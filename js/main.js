@@ -24,12 +24,25 @@ menuToggle.addEventListener("click", () => {
 });
 
 navLinks.forEach((navLink) => {
-  navLink.addEventListener("click", () => {
-    if (!isMenuOpen) return;
+  navLink.addEventListener("click", (event) => {
+    // 브라우저의 즉시 이동을 막고 JavaScript가 부드러운 이동을 제어한다.
+    event.preventDefault();
 
-    // 이동할 section을 선택한 뒤에도 열린 메뉴가 화면을 가리지 않게 닫는다.
-    isMenuOpen = false;
-    renderMenu();
+    const targetId = navLink.getAttribute("href");
+    const targetSection = document.querySelector(targetId);
+
+    if (!targetSection) return;
+
+    if (isMenuOpen) {
+      // 이동할 section을 선택한 뒤에도 열린 메뉴가 화면을 가리지 않게 닫는다.
+      isMenuOpen = false;
+      renderMenu();
+    }
+
+    targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    // 기본 anchor 이동을 막았으므로 공유 가능한 #주소는 직접 기록한다.
+    window.history.pushState(null, "", targetId);
   });
 });
 
