@@ -8,7 +8,7 @@ let isMenuOpen = false;
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
 const renderMenu = () => {
-  navigation.classList.toggle("is-open", isMenuOpen);
+  navigation.classList.toggle("active", isMenuOpen);
   menuToggle.setAttribute("aria-expanded", String(isMenuOpen));
   menuToggle.setAttribute("aria-label", isMenuOpen ? "메뉴 닫기" : "메뉴 열기");
 
