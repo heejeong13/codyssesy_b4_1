@@ -8,5 +8,59 @@
     <script src="js/main.js" defer></script>
   </head>
   <body>
+    <header>
+      <a href="#home" aria-label="홈으로 이동">Portfolio</a>
+
+      <nav aria-label="주요 메뉴">
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="home" aria-labelledby="hero-title">
+        <p>Frontend Developer</p>
+        <h1 id="hero-title">사용자 경험을 고민하며 성장하는 개발자입니다.</h1>
+        <p>Vanilla JavaScript의 동작 원리를 이해하고 웹에 적용합니다.</p>
+        <a href="#projects">프로젝트 보기</a>
+      </section>
+
+      <section id="about" aria-labelledby="about-title">
+        <h2 id="about-title">About</h2>
+        <p>
+          사용자와 가까운 웹 인터페이스에 관심을 가지고, 기본 원리를 이해하며
+          꾸준히 성장하고 있습니다.
+        </p>
+      </section>
+
+      <section id="skills" aria-labelledby="skills-title">
+        <h2 id="skills-title">Skills</h2>
+        <ul>
+          <li>HTML5</li>
+          <li>CSS3</li>
+          <li>JavaScript</li>
+          <li>Git &amp; GitHub</li>
+        </ul>
+      </section>
+
+      <section id="projects" aria-labelledby="projects-title">
+        <h2 id="projects-title">Projects</h2>
+        <p>GitHub API를 통해 프로젝트를 불러올 예정입니다.</p>
+      </section>
+
+      <section id="contact" aria-labelledby="contact-title">
+        <h2 id="contact-title">Contact</h2>
+        <p>함께 이야기하고 싶은 내용이 있다면 메시지를 보내주세요.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p><small>&copy; 2026 Portfolio. All rights reserved.</small></p>
+    </footer>
   </body>
 </html>
