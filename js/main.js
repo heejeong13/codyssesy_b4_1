@@ -1,4 +1,5 @@
 const menuToggle = document.querySelector(".menu-toggle");
+const menuIcon = document.querySelector(".menu-icon");
 const navigation = document.querySelector(".site-navigation");
 const navLinks = document.querySelectorAll(".nav-list a");
 
@@ -10,6 +11,10 @@ const renderMenu = () => {
   navigation.classList.toggle("is-open", isMenuOpen);
   menuToggle.setAttribute("aria-expanded", String(isMenuOpen));
   menuToggle.setAttribute("aria-label", isMenuOpen ? "메뉴 닫기" : "메뉴 열기");
+
+  // Font Awesome class만 교체해 상태에 맞는 아이콘을 표시한다.
+  menuIcon.classList.toggle("fa-bars", !isMenuOpen);
+  menuIcon.classList.toggle("fa-xmark", isMenuOpen);
 };
 
 menuToggle.addEventListener("click", () => {

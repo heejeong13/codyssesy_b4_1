@@ -116,9 +116,8 @@ button:focus-visible {
 
 .menu-toggle {
   display: inline-flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 0.3rem;
   width: 2.75rem;
   height: 2.75rem;
   padding: 0.625rem;
@@ -128,26 +127,9 @@ button:focus-visible {
   cursor: pointer;
 }
 
-.menu-toggle-line {
-  width: 100%;
-  height: 0.125rem;
-  background-color: var(--color-text);
-  transition:
-    opacity var(--transition-fast),
-    transform var(--transition-fast);
-}
-
-/* 열림 상태를 시각적으로도 알 수 있도록 햄버거 아이콘을 X 모양으로 바꾼다. */
-.menu-toggle[aria-expanded="true"] .menu-toggle-line:nth-child(1) {
-  transform: translateY(0.425rem) rotate(45deg);
-}
-
-.menu-toggle[aria-expanded="true"] .menu-toggle-line:nth-child(2) {
-  opacity: 0;
-}
-
-.menu-toggle[aria-expanded="true"] .menu-toggle-line:nth-child(3) {
-  transform: translateY(-0.425rem) rotate(-45deg);
+.menu-icon {
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
 }
 
 .site-navigation {
