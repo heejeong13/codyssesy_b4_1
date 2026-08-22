@@ -2,9 +2,15 @@ const menuToggle = document.querySelector(".menu-toggle");
 const menuIcon = document.querySelector(".menu-icon");
 const navigation = document.querySelector(".site-navigation");
 const navLinks = document.querySelectorAll(".nav-list a");
+const siteHeader = document.querySelector(".site-header");
+
+const NAV_SCROLL_THRESHOLD = 60;
 
 // click 이벤트와 렌더링 함수가 함께 사용하는 메뉴의 현재 상태다.
 let isMenuOpen = false;
+
+// scroll 이벤트와 렌더링 함수가 함께 사용하는 Header의 현재 상태다.
+let isHeaderScrolled = false;
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
 const renderMenu = () => {
@@ -15,6 +21,26 @@ const renderMenu = () => {
   // Font Awesome class만 교체해 상태에 맞는 아이콘을 표시한다.
   menuIcon.classList.toggle("fa-bars", !isMenuOpen);
   menuIcon.classList.toggle("fa-xmark", isMenuOpen);
+};
+
+// classList.add/remove를 사용해 스크롤 상태를 Header DOM에 반영한다.
+const renderHeaderScrollState = () => {
+  if (isHeaderScrolled) {
+    siteHeader.classList.add("scrolled");
+    return;
+  }
+
+  siteHeader.classList.remove("scrolled");
+};
+
+const updateHeaderScrollState = () => {
+  const nextHeaderScrolled = window.scrollY >= NAV_SCROLL_THRESHOLD;
+
+  // 같은 상태에서는 DOM을 다시 수정하지 않아 불필요한 렌더링을 줄인다.
+  if (nextHeaderScrolled === isHeaderScrolled) return;
+
+  isHeaderScrolled = nextHeaderScrolled;
+  renderHeaderScrollState();
 };
 
 menuToggle.addEventListener("click", () => {
@@ -46,5 +72,8 @@ navLinks.forEach((navLink) => {
   });
 });
 
-// HTML의 초기 표시도 JavaScript 상태와 일치하도록 한 번 렌더링한다.
+window.addEventListener("scroll", updateHeaderScrollState, { passive: true });
+
+// 새로고침 시 복원된 스크롤 위치까지 초기 상태에 반영한다.
 renderMenu();
+updateHeaderScrollState();
