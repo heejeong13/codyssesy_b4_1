@@ -3,14 +3,19 @@ const menuIcon = document.querySelector(".menu-icon");
 const navigation = document.querySelector(".site-navigation");
 const navLinks = document.querySelectorAll(".nav-list a");
 const siteHeader = document.querySelector(".site-header");
+const scrollTopButton = document.querySelector(".scroll-top-button");
 
 const NAV_SCROLL_THRESHOLD = 60;
+const SCROLL_TOP_THRESHOLD = 300;
 
 // click 이벤트와 렌더링 함수가 함께 사용하는 메뉴의 현재 상태다.
 let isMenuOpen = false;
 
 // scroll 이벤트와 렌더링 함수가 함께 사용하는 Header의 현재 상태다.
 let isHeaderScrolled = false;
+
+// scroll 이벤트와 렌더링 함수가 함께 사용하는 버튼의 표시 상태다.
+let isScrollTopVisible = false;
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
 const renderMenu = () => {
@@ -43,6 +48,25 @@ const updateHeaderScrollState = () => {
   renderHeaderScrollState();
 };
 
+const renderScrollTopButton = () => {
+  scrollTopButton.classList.toggle("is-visible", isScrollTopVisible);
+};
+
+const updateScrollTopState = () => {
+  const nextScrollTopVisible = window.scrollY >= SCROLL_TOP_THRESHOLD;
+
+  if (nextScrollTopVisible === isScrollTopVisible) return;
+
+  isScrollTopVisible = nextScrollTopVisible;
+  renderScrollTopButton();
+};
+
+// 하나의 scroll 이벤트에서 위치에 의존하는 UI 상태를 함께 갱신한다.
+const handleScroll = () => {
+  updateHeaderScrollState();
+  updateScrollTopState();
+};
+
 menuToggle.addEventListener("click", () => {
   // 사용자 이벤트는 상태만 바꾸고, 실제 DOM 변경은 렌더링 함수에 맡긴다.
   isMenuOpen = !isMenuOpen;
@@ -72,8 +96,12 @@ navLinks.forEach((navLink) => {
   });
 });
 
-window.addEventListener("scroll", updateHeaderScrollState, { passive: true });
+scrollTopButton.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+window.addEventListener("scroll", handleScroll, { passive: true });
 
 // 새로고침 시 복원된 스크롤 위치까지 초기 상태에 반영한다.
 renderMenu();
-updateHeaderScrollState();
+handleScroll();
