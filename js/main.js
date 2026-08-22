@@ -1,1 +1,1 @@
-// Interactions will be added step by step.
+// 사용자 상호작용은 단계별로 추가한다.

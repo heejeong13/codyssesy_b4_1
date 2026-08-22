@@ -1,5 +1,5 @@
 :root {
-  /* Colors */
+  /* 색상 */
   --color-background: #f8fafc;
   --color-surface: #ffffff;
   --color-text: #1e293b;
@@ -8,7 +8,7 @@
   --color-primary-hover: #4338ca;
   --color-border: #e2e8f0;
 
-  /* Typography */
+  /* 타이포그래피 */
   --font-family-base: system-ui, -apple-system, blinkmacsystemfont, "Segoe UI",
     sans-serif;
   --font-size-sm: 0.875rem;
@@ -16,7 +16,7 @@
   --font-size-lg: 1.25rem;
   --font-size-xl: 2rem;
 
-  /* Spacing */
+  /* 간격 */
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;
@@ -24,13 +24,14 @@
   --space-xl: 2rem;
   --space-2xl: 4rem;
 
-  /* Shared UI values */
+  /* 공통 UI 값 */
   --content-max-width: 70rem;
   --border-radius: 0.75rem;
   --box-shadow: 0 0.625rem 1.875rem rgb(15 23 42 / 10%);
   --transition-fast: 180ms ease;
 }
 
+/* padding과 border를 선언한 크기 안에 포함해 레이아웃 넘침을 방지한다. */
 *,
 *::before,
 *::after {
@@ -111,6 +112,7 @@ a:focus-visible {
   font-weight: 800;
 }
 
+/* 6단계에서 햄버거 버튼을 추가하기 전까지 Navigation에 접근할 수 있게 표시한다. */
 .nav-list {
   display: flex;
   flex-wrap: wrap;
@@ -130,6 +132,7 @@ a:focus-visible {
   color: var(--color-primary);
 }
 
+/* 모든 section이 동일한 중앙 정렬 콘텐츠 너비를 사용하도록 한다. */
 .section {
   width: 100%;
   max-width: var(--content-max-width);
@@ -205,4 +208,64 @@ a:focus-visible {
 .site-footer p {
   margin: 0;
   color: var(--color-text-muted);
+}
+
+/* 태블릿: 세로형 모바일 배치를 넓은 가로 배치로 전환한다. */
+@media (min-width: 768px) {
+  h1 {
+    max-width: 48rem;
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .nav-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: var(--space-xl);
+  }
+
+  .nav-list {
+    flex-wrap: nowrap;
+    gap: var(--space-lg);
+  }
+
+  .section {
+    padding: 5rem var(--space-xl);
+  }
+
+  .hero {
+    min-height: 75vh;
+  }
+
+  .skills-list {
+    /* 최소 너비를 0으로 설정해 긴 콘텐츠가 Grid 밖으로 밀어내는 현상을 방지한다. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 데스크톱: 글자와 간격을 키우고 Skills 카드를 4열로 배치한다. */
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 3rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+
+  .section {
+    padding-block: 6rem;
+  }
+
+  .hero-description {
+    font-size: var(--font-size-lg);
+  }
+
+  .skills-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
