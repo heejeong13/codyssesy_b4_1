@@ -12,7 +12,23 @@
       <div class="nav-container">
         <a class="logo" href="#home" aria-label="홈으로 이동">Portfolio</a>
 
-        <nav aria-label="주요 메뉴">
+        <button
+          class="menu-toggle"
+          type="button"
+          aria-label="메뉴 열기"
+          aria-controls="primary-navigation"
+          aria-expanded="false"
+        >
+          <span class="menu-toggle-line" aria-hidden="true"></span>
+          <span class="menu-toggle-line" aria-hidden="true"></span>
+          <span class="menu-toggle-line" aria-hidden="true"></span>
+        </button>
+
+        <nav
+          class="site-navigation"
+          id="primary-navigation"
+          aria-label="주요 메뉴"
+        >
           <ul class="nav-list">
             <li><a href="#home">Home</a></li>
             <li><a href="#about">About</a></li>
