@@ -8,6 +8,8 @@
   --color-primary-hover: #4338ca;
   --color-on-primary: #ffffff;
   --color-border: #e2e8f0;
+  --color-error: #b91c1c;
+  --color-success: #047857;
 
   /* 타이포그래피 */
   --font-family-base: system-ui, -apple-system, blinkmacsystemfont, "Segoe UI",
@@ -41,6 +43,8 @@
   --color-primary-hover: #a5b4fc;
   --color-on-primary: #ffffff;
   --color-border: #334155;
+  --color-error: #fca5a5;
+  --color-success: #6ee7b7;
   --box-shadow: 0 0.625rem 1.875rem rgb(0 0 0 / 25%);
 }
 
@@ -286,6 +290,105 @@ button:focus-visible {
   transition:
     border-color var(--transition-fast),
     background-color var(--transition-fast);
+}
+
+.contact-form {
+  display: grid;
+  gap: var(--space-lg);
+  width: 100%;
+  max-width: 42rem;
+  margin-top: var(--space-xl);
+  padding: var(--space-lg);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-surface);
+  box-shadow: var(--box-shadow);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.form-field {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.form-field label {
+  font-weight: 700;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: calc(var(--border-radius) * 0.75);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  font: inherit;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.form-field textarea {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+.form-field input:focus-visible,
+.form-field textarea:focus-visible {
+  border-color: var(--color-primary);
+  outline: 0.1875rem solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  outline-offset: 0.125rem;
+}
+
+/* 검증 상태를 색상뿐 아니라 aria-invalid 속성으로도 구분한다. */
+.form-field input[aria-invalid="true"],
+.form-field textarea[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+.form-error {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+}
+
+.form-submit-button {
+  justify-self: start;
+  padding: var(--space-sm) var(--space-lg);
+  border: 0;
+  border-radius: var(--border-radius);
+  color: var(--color-on-primary);
+  background-color: var(--color-primary);
+  font: inherit;
+  font-weight: 700;
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.form-submit-button:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-0.125rem);
+}
+
+.form-status {
+  min-height: 1.6em;
+  margin: 0;
+  font-weight: 700;
+}
+
+.form-status.is-error {
+  color: var(--color-error);
+}
+
+.form-status.is-success {
+  color: var(--color-success);
 }
 
 .site-footer {

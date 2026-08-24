@@ -6,11 +6,25 @@ const siteHeader = document.querySelector(".site-header");
 const scrollTopButton = document.querySelector(".scroll-top-button");
 const themeToggle = document.querySelector(".theme-toggle");
 const themeIcon = document.querySelector(".theme-icon");
+const contactForm = document.querySelector(".contact-form");
+const formFields = contactForm.querySelectorAll("input, textarea");
+const formStatus = contactForm.querySelector(".form-status");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
 const THEME_STORAGE_KEY = "portfolio-theme";
 const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const REQUIRED_FIELD_MESSAGES = {
+  name: "이름을 입력해주세요.",
+  email: "이메일을 입력해주세요.",
+  message: "메시지를 입력해주세요.",
+};
+const FORM_STATUS_MESSAGES = {
+  idle: "",
+  error: "입력 내용을 다시 확인해주세요.",
+  success: "입력 내용이 확인되었습니다.",
+};
 
 // click 이벤트와 렌더링 함수가 함께 사용하는 메뉴의 현재 상태다.
 let isMenuOpen = false;
@@ -28,6 +42,21 @@ const systemTheme = systemThemeQuery.matches ? "dark" : "light";
 
 // 저장된 선택이 없을 때만 운영체제의 색상 설정을 초기 상태로 사용한다.
 let currentTheme = hasUserThemePreference ? storedTheme : systemTheme;
+
+// 입력값, 필드별 오류, 제출 결과를 DOM과 분리해 하나의 상태로 관리한다.
+const formState = {
+  values: {
+    name: "",
+    email: "",
+    message: "",
+  },
+  errors: {
+    name: "",
+    email: "",
+    message: "",
+  },
+  status: "idle",
+};
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
 const renderMenu = () => {
@@ -76,6 +105,38 @@ const renderTheme = () => {
   );
   themeIcon.classList.toggle("fa-moon", !isDark);
   themeIcon.classList.toggle("fa-sun", isDark);
+};
+
+const getFieldError = (fieldName, value) => {
+  if (!value) return REQUIRED_FIELD_MESSAGES[fieldName];
+
+  if (fieldName === "email") {
+    if (!EMAIL_PATTERN.test(value)) return "올바른 이메일 형식을 입력해주세요.";
+  }
+
+  return "";
+};
+
+const renderFieldError = (field) => {
+  const errorMessage = formState.errors[field.name];
+  const errorElement = document.querySelector(`#${field.id}-error`);
+  const hasError = Boolean(errorMessage);
+
+  field.setAttribute("aria-invalid", String(hasError));
+  errorElement.textContent = errorMessage;
+};
+
+const renderFormStatus = () => {
+  formStatus.textContent = FORM_STATUS_MESSAGES[formState.status];
+  formStatus.classList.toggle("is-error", formState.status === "error");
+  formStatus.classList.toggle("is-success", formState.status === "success");
+};
+
+const updateFieldState = (field) => {
+  const value = field.value.trim();
+
+  formState.values[field.name] = value;
+  formState.errors[field.name] = getFieldError(field.name, value);
 };
 
 const updateScrollTopState = () => {
@@ -140,6 +201,36 @@ systemThemeQuery.addEventListener("change", (event) => {
 
   currentTheme = event.matches ? "dark" : "light";
   renderTheme();
+});
+
+formFields.forEach((field) => {
+  field.addEventListener("input", () => {
+    // 입력 이벤트마다 해당 필드의 상태만 갱신해 오류를 바로 수정할 수 있게 한다.
+    updateFieldState(field);
+    formState.status = "idle";
+    renderFieldError(field);
+    renderFormStatus();
+  });
+});
+
+contactForm.addEventListener("submit", (event) => {
+  // 브라우저의 페이지 이동을 막고 현재 문서에서 검증 결과를 렌더링한다.
+  event.preventDefault();
+
+  formFields.forEach((field) => {
+    updateFieldState(field);
+    renderFieldError(field);
+  });
+
+  const firstInvalidField = Array.from(formFields).find(
+    (field) => formState.errors[field.name],
+  );
+
+  formState.status = firstInvalidField ? "error" : "success";
+  renderFormStatus();
+
+  // 오류가 있으면 사용자가 바로 수정할 수 있도록 첫 번째 필드로 초점을 옮긴다.
+  if (firstInvalidField) firstInvalidField.focus();
 });
 
 window.addEventListener("scroll", handleScroll, { passive: true });
