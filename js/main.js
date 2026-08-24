@@ -13,7 +13,9 @@ const formSubmitButton = contactForm.querySelector(".form-submit-button");
 const revealSections = document.querySelectorAll(".section");
 const projectsView = document.querySelector(".projects-view");
 const projectFilters = document.querySelector(".project-filters");
+const projectsAnnouncement = document.querySelector(".projects-announcement");
 const typingText = document.querySelector(".typing-text");
+const typingCursor = document.querySelector(".typing-cursor");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
@@ -64,6 +66,7 @@ let currentTheme = hasUserThemePreference ? storedTheme : systemTheme;
 // 타이머가 변경하는 현재 글자 위치를 상태로 관리한다.
 const typingMessage = typingText.dataset.text;
 let typingIndex = 0;
+let typingTimerId;
 
 // 입력값, 필드별 오류, 제출 결과를 DOM과 분리해 하나의 상태로 관리한다.
 const formState = {
@@ -140,26 +143,39 @@ const renderTypingText = () => {
   typingText.textContent = typingMessage.slice(0, typingIndex);
 };
 
+const finishTypingEffect = () => {
+  clearTimeout(typingTimerId);
+  typingIndex = typingMessage.length;
+  renderTypingText();
+  typingCursor.classList.add("is-complete");
+};
+
 const typeNextCharacter = () => {
-  if (typingIndex >= typingMessage.length) return;
+  if (typingIndex >= typingMessage.length) {
+    finishTypingEffect();
+    return;
+  }
 
   typingIndex += 1;
   renderTypingText();
-  setTimeout(typeNextCharacter, TYPING_DELAY);
+  typingTimerId = setTimeout(typeNextCharacter, TYPING_DELAY);
 };
 
 const startTypingEffect = () => {
   if (motionPreferenceQuery.matches) {
-    typingIndex = typingMessage.length;
-    renderTypingText();
+    finishTypingEffect();
     return;
   }
 
   // HTML의 완성 문장을 비운 뒤 첫 timer event부터 한 글자씩 다시 렌더링한다.
+  typingCursor.classList.remove("is-complete");
   typingIndex = 0;
   renderTypingText();
-  setTimeout(typeNextCharacter, TYPING_DELAY);
+  typingTimerId = setTimeout(typeNextCharacter, TYPING_DELAY);
 };
+
+const getScrollBehavior = () =>
+  motionPreferenceQuery.matches ? "auto" : "smooth";
 
 const getFieldError = (fieldName, value) => {
   if (!value) return REQUIRED_FIELD_MESSAGES[fieldName];
@@ -294,6 +310,7 @@ const renderProjects = () => {
   if (status !== "success") projectFilters.innerHTML = "";
 
   if (status === "loading") {
+    projectsAnnouncement.textContent = "GitHub 프로젝트를 불러오는 중입니다.";
     projectsView.innerHTML = `
       <p class="projects-status">
         <i class="fa-solid fa-spinner loading-icon" aria-hidden="true"></i>
@@ -304,6 +321,7 @@ const renderProjects = () => {
   }
 
   if (status === "error") {
+    projectsAnnouncement.textContent = "프로젝트를 불러오지 못했습니다.";
     projectsView.innerHTML = `
       <div class="projects-error">
         <p class="projects-status is-error">프로젝트를 불러올 수 없습니다.</p>
@@ -314,6 +332,7 @@ const renderProjects = () => {
   }
 
   if (status === "empty") {
+    projectsAnnouncement.textContent = "표시할 프로젝트가 없습니다.";
     projectsView.innerHTML = `
       <p class="projects-status">표시할 프로젝트가 없습니다.</p>
     `;
@@ -328,6 +347,9 @@ const renderProjects = () => {
             (repository) => getRepositoryLanguage(repository) === selectedLanguage,
           );
 
+    const filterLabel = selectedLanguage === "All" ? "전체" : selectedLanguage;
+
+    projectsAnnouncement.textContent = `${filterLabel} 필터에서 프로젝트 ${filteredRepositories.length}개를 표시합니다.`;
     renderProjectFilters();
     projectsView.innerHTML = `
       <div class="projects-grid">
@@ -340,6 +362,7 @@ const renderProjects = () => {
   projectsView.innerHTML = `
     <p class="projects-status">GitHub 프로젝트를 준비하고 있습니다.</p>
   `;
+  projectsAnnouncement.textContent = "GitHub 프로젝트를 준비하고 있습니다.";
 };
 
 const fetchProjects = async () => {
@@ -421,7 +444,10 @@ navLinks.forEach((navLink) => {
       renderMenu();
     }
 
-    targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    targetSection.scrollIntoView({
+      behavior: getScrollBehavior(),
+      block: "start",
+    });
 
     // 기본 anchor 이동을 막았으므로 공유 가능한 #주소는 직접 기록한다.
     window.history.pushState(null, "", targetId);
@@ -429,7 +455,7 @@ navLinks.forEach((navLink) => {
 });
 
 scrollTopButton.addEventListener("click", () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: getScrollBehavior() });
 });
 
 themeToggle.addEventListener("click", () => {
@@ -446,6 +472,11 @@ systemThemeQuery.addEventListener("change", (event) => {
 
   currentTheme = event.matches ? "dark" : "light";
   renderTheme();
+});
+
+motionPreferenceQuery.addEventListener("change", (event) => {
+  // 실행 중 동작 감소 설정이 켜지면 남은 timer를 취소하고 완성 문장을 표시한다.
+  if (event.matches) finishTypingEffect();
 });
 
 formFields.forEach((field) => {
@@ -529,6 +560,21 @@ projectFilters.addEventListener("click", (event) => {
   // 필터 이벤트는 API를 다시 호출하지 않고 선택 상태와 카드 DOM만 변경한다.
   projectsState.selectedLanguage = filterButton.dataset.language;
   renderProjects();
+
+  // innerHTML로 교체된 버튼 중 새 선택 버튼에 keyboard focus를 복원한다.
+  const selectedFilterButton = Array.from(
+    projectFilters.querySelectorAll(".project-filter-button"),
+  ).find((button) => button.dataset.language === projectsState.selectedLanguage);
+
+  selectedFilterButton.focus();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !isMenuOpen) return;
+
+  isMenuOpen = false;
+  renderMenu();
+  menuToggle.focus();
 });
 
 window.addEventListener("scroll", handleScroll, { passive: true });
