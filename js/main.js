@@ -10,6 +10,7 @@ const themeIcon = document.querySelector(".theme-icon");
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
 const THEME_STORAGE_KEY = "portfolio-theme";
+const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
 // click 이벤트와 렌더링 함수가 함께 사용하는 메뉴의 현재 상태다.
 let isMenuOpen = false;
@@ -20,11 +21,13 @@ let isHeaderScrolled = false;
 // scroll 이벤트와 렌더링 함수가 함께 사용하는 버튼의 표시 상태다.
 let isScrollTopVisible = false;
 
-// 저장값이 dark일 때만 Dark로 시작하고, 없거나 잘못된 값이면 Light를 사용한다.
+// light와 dark만 유효한 사용자 선택으로 인정해 잘못된 저장값을 걸러낸다.
 const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+let hasUserThemePreference = storedTheme === "light" || storedTheme === "dark";
+const systemTheme = systemThemeQuery.matches ? "dark" : "light";
 
-// 저장된 사용자 선택을 초기 테마 상태로 사용한다.
-let currentTheme = storedTheme === "dark" ? "dark" : "light";
+// 저장된 선택이 없을 때만 운영체제의 색상 설정을 초기 상태로 사용한다.
+let currentTheme = hasUserThemePreference ? storedTheme : systemTheme;
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
 const renderMenu = () => {
@@ -126,7 +129,16 @@ scrollTopButton.addEventListener("click", () => {
 themeToggle.addEventListener("click", () => {
   // 이벤트에서 변경한 상태를 저장한 뒤 DOM 갱신은 renderTheme()에 맡긴다.
   currentTheme = currentTheme === "light" ? "dark" : "light";
+  hasUserThemePreference = true;
   localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
+  renderTheme();
+});
+
+systemThemeQuery.addEventListener("change", (event) => {
+  // 명시적인 사용자 선택이 있다면 시스템 설정이 바뀌어도 덮어쓰지 않는다.
+  if (hasUserThemePreference) return;
+
+  currentTheme = event.matches ? "dark" : "light";
   renderTheme();
 });
 
