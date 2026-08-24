@@ -41,6 +41,11 @@ HTML, CSS, Vanilla JavaScript의 기본 동작을 학습하기 위해 만든 반
 │   └── style.css
 ├── js/
 │   └── main.js
+├── docs/
+│   ├── EVALUATION_ANSWER_GUIDE.md
+│   ├── EVALUATION_QUESTIONS.md
+│   ├── LEARNING_NOTES.md
+│   └── STUDY_NOTES.md
 ├── images/
 │   ├── profile.jpg
 │   ├── screenshot-desktop.jpg
@@ -48,6 +53,13 @@ HTML, CSS, Vanilla JavaScript의 기본 동작을 학습하기 위해 만든 반
 │   └── screenshot-dark.jpg
 └── README.md
 ```
+
+## 학습 문서
+
+- [평가 질문 답변 가이드](docs/EVALUATION_ANSWER_GUIDE.md)
+- [단계별 예상 평가 질문](docs/EVALUATION_QUESTIONS.md)
+- [프로젝트 학습 기록](docs/LEARNING_NOTES.md)
+- [HTML·CSS·JavaScript 스터디 노트](docs/STUDY_NOTES.md)
 
 ## Event → State → Render
 
