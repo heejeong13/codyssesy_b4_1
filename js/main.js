@@ -9,9 +9,11 @@ const themeIcon = document.querySelector(".theme-icon");
 const contactForm = document.querySelector(".contact-form");
 const formFields = contactForm.querySelectorAll("input, textarea");
 const formStatus = contactForm.querySelector(".form-status");
+const revealSections = document.querySelectorAll(".section");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
+const REVEAL_THRESHOLD = 0.2;
 const THEME_STORAGE_KEY = "portfolio-theme";
 const GITHUB_API_URL = "https://api.github.com/users/heejeong13/repos";
 const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -160,6 +162,19 @@ const fetchProjects = async () => {
   }
 };
 
+const sectionObserver = new IntersectionObserver(
+  (entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+
+      // 화면에 20% 이상 들어온 section만 표시하고 한 번 표시되면 관찰을 끝낸다.
+      entry.target.classList.add("is-visible");
+      observer.unobserve(entry.target);
+    });
+  },
+  { threshold: REVEAL_THRESHOLD },
+);
+
 const updateScrollTopState = () => {
   const nextScrollTopVisible = window.scrollY >= SCROLL_TOP_THRESHOLD;
 
@@ -255,6 +270,12 @@ contactForm.addEventListener("submit", (event) => {
 });
 
 window.addEventListener("scroll", handleScroll, { passive: true });
+
+revealSections.forEach((section) => {
+  // CSS 시작 상태는 JavaScript에서 추가해 JS 실패 시 콘텐츠가 숨지 않게 한다.
+  section.classList.add("reveal-section");
+  sectionObserver.observe(section);
+});
 
 // 새로고침 시 복원된 스크롤 위치까지 초기 상태에 반영한다.
 renderMenu();

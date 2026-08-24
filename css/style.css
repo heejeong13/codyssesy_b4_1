@@ -212,6 +212,20 @@ button:focus-visible {
   scroll-margin-top: 5rem;
 }
 
+/* JavaScript가 활성화된 경우에만 시작 상태를 추가해 콘텐츠 접근을 보장한다. */
+.section.reveal-section {
+  opacity: 0;
+  transform: translateY(var(--space-lg));
+  transition:
+    opacity 600ms ease,
+    transform 600ms ease;
+}
+
+.section.reveal-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .hero {
   display: grid;
   align-content: center;
@@ -549,5 +563,14 @@ button:focus-visible {
 
   .skills-list {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* 움직임 감소를 선택한 사용자는 콘텐츠를 애니메이션 없이 바로 확인한다. */
+@media (prefers-reduced-motion: reduce) {
+  .section.reveal-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
