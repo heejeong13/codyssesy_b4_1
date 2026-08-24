@@ -12,13 +12,16 @@ const formStatus = contactForm.querySelector(".form-status");
 const revealSections = document.querySelectorAll(".section");
 const projectsView = document.querySelector(".projects-view");
 const projectFilters = document.querySelector(".project-filters");
+const typingText = document.querySelector(".typing-text");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
 const REVEAL_THRESHOLD = 0.2;
+const TYPING_DELAY = 80;
 const THEME_STORAGE_KEY = "portfolio-theme";
 const GITHUB_API_URL = "https://api.github.com/users/heejeong13/repos";
 const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+const motionPreferenceQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const REQUIRED_FIELD_MESSAGES = {
   name: "이름을 입력해주세요.",
@@ -54,6 +57,10 @@ const systemTheme = systemThemeQuery.matches ? "dark" : "light";
 
 // 저장된 선택이 없을 때만 운영체제의 색상 설정을 초기 상태로 사용한다.
 let currentTheme = hasUserThemePreference ? storedTheme : systemTheme;
+
+// 타이머가 변경하는 현재 글자 위치를 상태로 관리한다.
+const typingMessage = typingText.dataset.text;
+let typingIndex = 0;
 
 // 입력값, 필드별 오류, 제출 결과를 DOM과 분리해 하나의 상태로 관리한다.
 const formState = {
@@ -124,6 +131,31 @@ const renderTheme = () => {
   );
   themeIcon.classList.toggle("fa-moon", !isDark);
   themeIcon.classList.toggle("fa-sun", isDark);
+};
+
+const renderTypingText = () => {
+  typingText.textContent = typingMessage.slice(0, typingIndex);
+};
+
+const typeNextCharacter = () => {
+  if (typingIndex >= typingMessage.length) return;
+
+  typingIndex += 1;
+  renderTypingText();
+  setTimeout(typeNextCharacter, TYPING_DELAY);
+};
+
+const startTypingEffect = () => {
+  if (motionPreferenceQuery.matches) {
+    typingIndex = typingMessage.length;
+    renderTypingText();
+    return;
+  }
+
+  // HTML의 완성 문장을 비운 뒤 첫 timer event부터 한 글자씩 다시 렌더링한다.
+  typingIndex = 0;
+  renderTypingText();
+  setTimeout(typeNextCharacter, TYPING_DELAY);
 };
 
 const getFieldError = (fieldName, value) => {
@@ -458,3 +490,4 @@ renderMenu();
 renderTheme();
 handleScroll();
 fetchProjects();
+startTypingEffect();
