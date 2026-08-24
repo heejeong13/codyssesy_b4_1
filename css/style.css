@@ -306,6 +306,33 @@ button:focus-visible {
     background-color var(--transition-fast);
 }
 
+.projects-view {
+  min-height: 6rem;
+}
+
+.projects-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 3rem;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.projects-status.is-error {
+  color: var(--color-error);
+}
+
+.loading-icon {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
 .contact-form {
   display: grid;
   gap: var(--space-lg);
@@ -568,6 +595,10 @@ button:focus-visible {
 
 /* 움직임 감소를 선택한 사용자는 콘텐츠를 애니메이션 없이 바로 확인한다. */
 @media (prefers-reduced-motion: reduce) {
+  .loading-icon {
+    animation: none;
+  }
+
   .section.reveal-section {
     opacity: 1;
     transform: none;

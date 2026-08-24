@@ -10,6 +10,7 @@ const contactForm = document.querySelector(".contact-form");
 const formFields = contactForm.querySelectorAll("input, textarea");
 const formStatus = contactForm.querySelector(".form-status");
 const revealSections = document.querySelectorAll(".section");
+const projectsView = document.querySelector(".projects-view");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
@@ -59,6 +60,13 @@ const formState = {
     message: "",
   },
   status: "idle",
+};
+
+// API 요청 단계와 repository 데이터를 한곳에서 관리해 화면 상태를 구분한다.
+const projectsState = {
+  status: "idle",
+  repositories: [],
+  errorMessage: "",
 };
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
@@ -142,7 +150,52 @@ const updateFieldState = (field) => {
   formState.errors[field.name] = getFieldError(field.name, value);
 };
 
+const renderProjects = () => {
+  const { status, repositories } = projectsState;
+
+  projectsView.setAttribute("aria-busy", String(status === "loading"));
+
+  if (status === "loading") {
+    projectsView.innerHTML = `
+      <p class="projects-status">
+        <i class="fa-solid fa-spinner loading-icon" aria-hidden="true"></i>
+        로딩 중...
+      </p>
+    `;
+    return;
+  }
+
+  if (status === "error") {
+    projectsView.innerHTML = `
+      <p class="projects-status is-error">프로젝트를 불러올 수 없습니다.</p>
+    `;
+    return;
+  }
+
+  if (status === "empty") {
+    projectsView.innerHTML = `
+      <p class="projects-status">표시할 프로젝트가 없습니다.</p>
+    `;
+    return;
+  }
+
+  if (status === "success") {
+    projectsView.innerHTML = `
+      <p class="projects-status">프로젝트 ${repositories.length}개를 불러왔습니다.</p>
+    `;
+    return;
+  }
+
+  projectsView.innerHTML = `
+    <p class="projects-status">GitHub 프로젝트를 준비하고 있습니다.</p>
+  `;
+};
+
 const fetchProjects = async () => {
+  projectsState.status = "loading";
+  projectsState.errorMessage = "";
+  renderProjects();
+
   try {
     const response = await fetch(GITHUB_API_URL);
 
@@ -153,12 +206,16 @@ const fetchProjects = async () => {
 
     const repositories = await response.json();
 
-    // 화면 렌더링 전 단계이므로 받아온 데이터 개수만 개발자 도구에서 확인한다.
-    console.info(`GitHub 프로젝트 ${repositories.length}개를 불러왔습니다.`);
-    return repositories;
+    projectsState.repositories = repositories;
+    projectsState.status = repositories.length > 0 ? "success" : "empty";
   } catch (error) {
+    projectsState.status = "error";
+    projectsState.repositories = [];
+    projectsState.errorMessage = error.message;
     console.error("GitHub 프로젝트 요청 중 오류가 발생했습니다.", error);
-    return null;
+  } finally {
+    // 요청 결과와 관계없이 마지막 상태를 Projects DOM에 반드시 반영한다.
+    renderProjects();
   }
 };
 
