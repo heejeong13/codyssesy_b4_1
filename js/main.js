@@ -282,8 +282,10 @@ const sectionObserver = new IntersectionObserver(
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
 
-      // 화면에 20% 이상 들어온 section만 표시하고 한 번 표시되면 관찰을 끝낸다.
-      entry.target.classList.add("is-visible");
+      const section = entry.target.closest(".section");
+
+      // 높이가 긴 section도 제목이 20% 들어오면 표시하고 관찰을 끝낸다.
+      section.classList.add("is-visible");
       observer.unobserve(entry.target);
     });
   },
@@ -397,7 +399,7 @@ window.addEventListener("scroll", handleScroll, { passive: true });
 revealSections.forEach((section) => {
   // CSS 시작 상태는 JavaScript에서 추가해 JS 실패 시 콘텐츠가 숨지 않게 한다.
   section.classList.add("reveal-section");
-  sectionObserver.observe(section);
+  sectionObserver.observe(section.querySelector("h1, h2"));
 });
 
 // 새로고침 시 복원된 스크롤 위치까지 초기 상태에 반영한다.
