@@ -6,6 +6,7 @@
   --color-text-muted: #64748b;
   --color-primary: #4f46e5;
   --color-primary-hover: #4338ca;
+  --color-on-primary: #ffffff;
   --color-border: #e2e8f0;
 
   /* 타이포그래피 */
@@ -31,6 +32,18 @@
   --transition-fast: 180ms ease;
 }
 
+[data-theme="dark"] {
+  --color-background: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #f8fafc;
+  --color-text-muted: #cbd5e1;
+  --color-primary: #818cf8;
+  --color-primary-hover: #a5b4fc;
+  --color-on-primary: #ffffff;
+  --color-border: #334155;
+  --box-shadow: 0 0.625rem 1.875rem rgb(0 0 0 / 25%);
+}
+
 /* padding과 border를 선언한 크기 안에 포함해 레이아웃 넘침을 방지한다. */
 *,
 *::before,
@@ -46,6 +59,9 @@ body {
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   line-height: 1.6;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 h1,
@@ -110,7 +126,7 @@ button:focus-visible {
 
 .nav-container {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: var(--space-sm);
   width: 100%;
@@ -125,7 +141,8 @@ button:focus-visible {
   font-weight: 800;
 }
 
-.menu-toggle {
+.menu-toggle,
+.theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -136,9 +153,18 @@ button:focus-visible {
   border-radius: var(--border-radius);
   background-color: var(--color-surface);
   cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
-.menu-icon {
+.menu-toggle:hover,
+.theme-toggle:hover {
+  border-color: var(--color-primary);
+}
+
+.menu-icon,
+.theme-icon {
   color: var(--color-text);
   font-size: var(--font-size-lg);
 }
@@ -207,7 +233,7 @@ button:focus-visible {
   justify-self: start;
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--border-radius);
-  color: var(--color-surface);
+  color: var(--color-on-primary);
   background-color: var(--color-primary);
   font-weight: 700;
   box-shadow: var(--box-shadow);
@@ -257,6 +283,9 @@ button:focus-visible {
   background-color: var(--color-surface);
   font-weight: 700;
   box-shadow: var(--box-shadow);
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .site-footer {
@@ -268,6 +297,9 @@ button:focus-visible {
   border-top: 0.0625rem solid var(--color-border);
   background-color: var(--color-surface);
   text-align: center;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
 }
 
 .social-link {
@@ -301,7 +333,7 @@ button:focus-visible {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  color: var(--color-surface);
+  color: var(--color-on-primary);
   background-color: var(--color-primary);
   box-shadow: var(--box-shadow);
   cursor: pointer;
@@ -352,6 +384,11 @@ button:focus-visible {
 
   .site-navigation {
     display: block;
+    margin-left: auto;
+  }
+
+  .theme-toggle {
+    order: 3;
   }
 
   .nav-list {

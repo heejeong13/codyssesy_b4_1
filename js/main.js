@@ -4,6 +4,8 @@ const navigation = document.querySelector(".site-navigation");
 const navLinks = document.querySelectorAll(".nav-list a");
 const siteHeader = document.querySelector(".site-header");
 const scrollTopButton = document.querySelector(".scroll-top-button");
+const themeToggle = document.querySelector(".theme-toggle");
+const themeIcon = document.querySelector(".theme-icon");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
@@ -16,6 +18,9 @@ let isHeaderScrolled = false;
 
 // scroll 이벤트와 렌더링 함수가 함께 사용하는 버튼의 표시 상태다.
 let isScrollTopVisible = false;
+
+// click 이벤트와 렌더링 함수가 함께 사용하는 현재 테마 상태다.
+let currentTheme = "light";
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
 const renderMenu = () => {
@@ -50,6 +55,20 @@ const updateHeaderScrollState = () => {
 
 const renderScrollTopButton = () => {
   scrollTopButton.classList.toggle("is-visible", isScrollTopVisible);
+};
+
+// 테마 상태를 html 속성, 버튼 설명, Font Awesome 아이콘에 함께 반영한다.
+const renderTheme = () => {
+  const isDark = currentTheme === "dark";
+
+  document.documentElement.dataset.theme = currentTheme;
+  themeToggle.setAttribute("aria-pressed", String(isDark));
+  themeToggle.setAttribute(
+    "aria-label",
+    isDark ? "라이트 모드로 전환" : "다크 모드로 전환",
+  );
+  themeIcon.classList.toggle("fa-moon", !isDark);
+  themeIcon.classList.toggle("fa-sun", isDark);
 };
 
 const updateScrollTopState = () => {
@@ -100,8 +119,15 @@ scrollTopButton.addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
+themeToggle.addEventListener("click", () => {
+  // 이벤트에서는 상태를 변경하고 DOM 갱신은 renderTheme()에 맡긴다.
+  currentTheme = currentTheme === "light" ? "dark" : "light";
+  renderTheme();
+});
+
 window.addEventListener("scroll", handleScroll, { passive: true });
 
 // 새로고침 시 복원된 스크롤 위치까지 초기 상태에 반영한다.
 renderMenu();
+renderTheme();
 handleScroll();
