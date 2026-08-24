@@ -11,6 +11,7 @@ const formFields = contactForm.querySelectorAll("input, textarea");
 const formStatus = contactForm.querySelector(".form-status");
 const revealSections = document.querySelectorAll(".section");
 const projectsView = document.querySelector(".projects-view");
+const projectFilters = document.querySelector(".project-filters");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
@@ -73,6 +74,7 @@ const formState = {
 const projectsState = {
   status: "idle",
   repositories: [],
+  selectedLanguage: "All",
 };
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
@@ -205,10 +207,40 @@ const createProjectCard = (repository) => {
   `;
 };
 
+const getRepositoryLanguage = (repository) => repository.language || "기타";
+
+const renderProjectFilters = () => {
+  const languages = [
+    "All",
+    ...new Set(projectsState.repositories.map(getRepositoryLanguage)),
+  ];
+
+  projectFilters.innerHTML = languages
+    .map((language) => {
+      const safeLanguage = escapeHtml(language);
+      const label = language === "All" ? "전체" : safeLanguage;
+      const isSelected = language === projectsState.selectedLanguage;
+
+      return `
+        <button
+          class="project-filter-button"
+          type="button"
+          data-language="${safeLanguage}"
+          aria-pressed="${isSelected}"
+        >
+          ${label}
+        </button>
+      `;
+    })
+    .join("");
+};
+
 const renderProjects = () => {
-  const { status, repositories } = projectsState;
+  const { status, repositories, selectedLanguage } = projectsState;
 
   projectsView.setAttribute("aria-busy", String(status === "loading"));
+
+  if (status !== "success") projectFilters.innerHTML = "";
 
   if (status === "loading") {
     projectsView.innerHTML = `
@@ -238,9 +270,17 @@ const renderProjects = () => {
   }
 
   if (status === "success") {
+    const filteredRepositories =
+      selectedLanguage === "All"
+        ? repositories
+        : repositories.filter(
+            (repository) => getRepositoryLanguage(repository) === selectedLanguage,
+          );
+
+    renderProjectFilters();
     projectsView.innerHTML = `
       <div class="projects-grid">
-        ${repositories.map(createProjectCard).join("")}
+        ${filteredRepositories.map(createProjectCard).join("")}
       </div>
     `;
     return;
@@ -253,6 +293,7 @@ const renderProjects = () => {
 
 const fetchProjects = async () => {
   projectsState.status = "loading";
+  projectsState.selectedLanguage = "All";
   renderProjects();
 
   try {
@@ -392,6 +433,16 @@ projectsView.addEventListener("click", (event) => {
 
   if (!retryButton) return;
   fetchProjects();
+});
+
+projectFilters.addEventListener("click", (event) => {
+  const filterButton = event.target.closest(".project-filter-button");
+
+  if (!filterButton) return;
+
+  // 필터 이벤트는 API를 다시 호출하지 않고 선택 상태와 카드 DOM만 변경한다.
+  projectsState.selectedLanguage = filterButton.dataset.language;
+  renderProjects();
 });
 
 window.addEventListener("scroll", handleScroll, { passive: true });

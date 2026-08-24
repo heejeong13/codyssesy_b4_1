@@ -310,6 +310,44 @@ button:focus-visible {
   min-height: 6rem;
 }
 
+.project-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+}
+
+.project-filters:empty {
+  display: none;
+}
+
+.project-filter-button {
+  padding: var(--space-xs) var(--space-md);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  background-color: var(--color-surface);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.project-filter-button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.project-filter-button[aria-pressed="true"] {
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+  background-color: var(--color-primary);
+}
+
 .projects-status {
   display: flex;
   align-items: center;
