@@ -329,6 +329,74 @@ button:focus-visible {
   gap: var(--space-sm);
 }
 
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-lg);
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+  padding: var(--space-lg);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-surface);
+  box-shadow: var(--box-shadow);
+  transition:
+    border-color var(--transition-fast),
+    transform var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.project-card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-0.25rem);
+}
+
+.project-card h3,
+.project-card p {
+  margin: 0;
+}
+
+.project-card h3 {
+  overflow-wrap: anywhere;
+  font-size: var(--font-size-lg);
+}
+
+.project-description {
+  flex-grow: 1;
+  color: var(--color-text-muted);
+}
+
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.project-meta li,
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.project-link {
+  align-self: flex-start;
+  color: var(--color-primary);
+  font-weight: 700;
+  transition: color var(--transition-fast);
+}
+
+.project-link:hover {
+  color: var(--color-primary-hover);
+}
+
 .loading-icon {
   animation: spin 900ms linear infinite;
 }
@@ -611,5 +679,9 @@ button:focus-visible {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .project-card:hover {
+    transform: none;
   }
 }

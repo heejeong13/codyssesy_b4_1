@@ -29,6 +29,13 @@ const FORM_STATUS_MESSAGES = {
   error: "입력 내용을 다시 확인해주세요.",
   success: "입력 내용이 확인되었습니다.",
 };
+const HTML_CHARACTER_ENTITIES = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#039;",
+};
 
 // click 이벤트와 렌더링 함수가 함께 사용하는 메뉴의 현재 상태다.
 let isMenuOpen = false;
@@ -149,6 +156,55 @@ const updateFieldState = (field) => {
   formState.errors[field.name] = getFieldError(field.name, value);
 };
 
+const escapeHtml = (value) => {
+  // API 문자열이 innerHTML에서 실제 태그나 속성으로 실행되지 않게 변환한다.
+  return String(value).replace(
+    /[&<>"']/g,
+    (character) => HTML_CHARACTER_ENTITIES[character],
+  );
+};
+
+const createProjectCard = (repository) => {
+  const {
+    name,
+    description,
+    html_url: htmlUrl,
+    language,
+    stargazers_count: starCount,
+  } = repository;
+  const safeName = escapeHtml(name);
+  const safeDescription = escapeHtml(description || "등록된 설명이 없습니다.");
+  const safeLanguage = escapeHtml(language || "기타");
+  const safeUrl = escapeHtml(htmlUrl);
+
+  return `
+    <article class="project-card">
+      <h3>${safeName}</h3>
+      <p class="project-description">${safeDescription}</p>
+      <ul class="project-meta" aria-label="프로젝트 정보">
+        <li>
+          <i class="fa-solid fa-code" aria-hidden="true"></i>
+          ${safeLanguage}
+        </li>
+        <li>
+          <i class="fa-solid fa-star" aria-hidden="true"></i>
+          ${starCount}
+        </li>
+      </ul>
+      <a
+        class="project-link"
+        href="${safeUrl}"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="${safeName} 저장소 새 창에서 보기"
+      >
+        저장소 보기
+        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+      </a>
+    </article>
+  `;
+};
+
 const renderProjects = () => {
   const { status, repositories } = projectsState;
 
@@ -183,7 +239,9 @@ const renderProjects = () => {
 
   if (status === "success") {
     projectsView.innerHTML = `
-      <p class="projects-status">프로젝트 ${repositories.length}개를 불러왔습니다.</p>
+      <div class="projects-grid">
+        ${repositories.map(createProjectCard).join("")}
+      </div>
     `;
     return;
   }
