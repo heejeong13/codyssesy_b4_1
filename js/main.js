@@ -13,6 +13,7 @@ const formStatus = contactForm.querySelector(".form-status");
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
 const THEME_STORAGE_KEY = "portfolio-theme";
+const GITHUB_API_URL = "https://api.github.com/users/heejeong13/repos";
 const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const REQUIRED_FIELD_MESSAGES = {
@@ -139,6 +140,26 @@ const updateFieldState = (field) => {
   formState.errors[field.name] = getFieldError(field.name, value);
 };
 
+const fetchProjects = async () => {
+  try {
+    const response = await fetch(GITHUB_API_URL);
+
+    // fetch는 403이나 404에서도 reject되지 않으므로 HTTP 성공 여부를 직접 검사한다.
+    if (!response.ok) {
+      throw new Error(`GitHub API 요청 실패: ${response.status}`);
+    }
+
+    const repositories = await response.json();
+
+    // 화면 렌더링 전 단계이므로 받아온 데이터 개수만 개발자 도구에서 확인한다.
+    console.info(`GitHub 프로젝트 ${repositories.length}개를 불러왔습니다.`);
+    return repositories;
+  } catch (error) {
+    console.error("GitHub 프로젝트 요청 중 오류가 발생했습니다.", error);
+    return null;
+  }
+};
+
 const updateScrollTopState = () => {
   const nextScrollTopVisible = window.scrollY >= SCROLL_TOP_THRESHOLD;
 
@@ -239,3 +260,4 @@ window.addEventListener("scroll", handleScroll, { passive: true });
 renderMenu();
 renderTheme();
 handleScroll();
+fetchProjects();
