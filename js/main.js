@@ -101,6 +101,11 @@ const renderMenu = () => {
   menuIcon.classList.toggle("fa-xmark", isMenuOpen);
 };
 
+const setMenuOpen = (nextMenuOpen) => {
+  isMenuOpen = nextMenuOpen;
+  renderMenu();
+};
+
 // classList.add/remove를 사용해 스크롤 상태를 Header DOM에 반영한다.
 const renderHeaderScrollState = () => {
   if (isHeaderScrolled) {
@@ -217,6 +222,17 @@ const updateFieldState = (field) => {
   formState.errors[field.name] = getFieldError(field.name, value);
 };
 
+const validateForm = () => {
+  formFields.forEach((field) => {
+    updateFieldState(field);
+    renderFieldError(field);
+  });
+
+  return Array.from(formFields).find(
+    (field) => formState.errors[field.name],
+  );
+};
+
 const resetFormState = () => {
   formFields.forEach((field) => {
     formState.values[field.name] = "";
@@ -302,8 +318,18 @@ const renderProjectFilters = () => {
     .join("");
 };
 
+const getFilteredRepositories = () => {
+  const { repositories, selectedLanguage } = projectsState;
+
+  if (selectedLanguage === "All") return repositories;
+
+  return repositories.filter(
+    (repository) => getRepositoryLanguage(repository) === selectedLanguage,
+  );
+};
+
 const renderProjects = () => {
-  const { status, repositories, selectedLanguage } = projectsState;
+  const { status, selectedLanguage } = projectsState;
 
   projectsView.setAttribute("aria-busy", String(status === "loading"));
 
@@ -340,12 +366,7 @@ const renderProjects = () => {
   }
 
   if (status === "success") {
-    const filteredRepositories =
-      selectedLanguage === "All"
-        ? repositories
-        : repositories.filter(
-            (repository) => getRepositoryLanguage(repository) === selectedLanguage,
-          );
+    const filteredRepositories = getFilteredRepositories();
 
     const filterLabel = selectedLanguage === "All" ? "전체" : selectedLanguage;
 
@@ -424,8 +445,7 @@ const handleScroll = () => {
 
 menuToggle.addEventListener("click", () => {
   // 사용자 이벤트는 상태만 바꾸고, 실제 DOM 변경은 렌더링 함수에 맡긴다.
-  isMenuOpen = !isMenuOpen;
-  renderMenu();
+  setMenuOpen(!isMenuOpen);
 });
 
 navLinks.forEach((navLink) => {
@@ -440,8 +460,7 @@ navLinks.forEach((navLink) => {
 
     if (isMenuOpen) {
       // 이동할 section을 선택한 뒤에도 열린 메뉴가 화면을 가리지 않게 닫는다.
-      isMenuOpen = false;
-      renderMenu();
+      setMenuOpen(false);
     }
 
     targetSection.scrollIntoView({
@@ -496,14 +515,7 @@ contactForm.addEventListener("submit", async (event) => {
   // 브라우저의 페이지 이동을 막고 현재 문서에서 검증 결과를 렌더링한다.
   event.preventDefault();
 
-  formFields.forEach((field) => {
-    updateFieldState(field);
-    renderFieldError(field);
-  });
-
-  const firstInvalidField = Array.from(formFields).find(
-    (field) => formState.errors[field.name],
-  );
+  const firstInvalidField = validateForm();
 
   if (firstInvalidField) {
     formState.status = "validationError";
@@ -572,8 +584,7 @@ projectFilters.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape" || !isMenuOpen) return;
 
-  isMenuOpen = false;
-  renderMenu();
+  setMenuOpen(false);
   menuToggle.focus();
 });
 
