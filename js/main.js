@@ -9,6 +9,7 @@ const themeIcon = document.querySelector(".theme-icon");
 const contactForm = document.querySelector(".contact-form");
 const formFields = contactForm.querySelectorAll("input, textarea");
 const formStatus = contactForm.querySelector(".form-status");
+const formSubmitButton = contactForm.querySelector(".form-submit-button");
 const revealSections = document.querySelectorAll(".section");
 const projectsView = document.querySelector(".projects-view");
 const projectFilters = document.querySelector(".project-filters");
@@ -30,8 +31,10 @@ const REQUIRED_FIELD_MESSAGES = {
 };
 const FORM_STATUS_MESSAGES = {
   idle: "",
-  error: "입력 내용을 다시 확인해주세요.",
-  success: "입력 내용이 확인되었습니다.",
+  validationError: "입력 내용을 다시 확인해주세요.",
+  submitting: "메시지를 전송하고 있습니다...",
+  success: "메시지가 성공적으로 전송되었습니다.",
+  submissionError: "메시지를 전송하지 못했습니다. 잠시 후 다시 시도해주세요.",
 };
 const HTML_CHARACTER_ENTITIES = {
   "&": "&amp;",
@@ -178,9 +181,17 @@ const renderFieldError = (field) => {
 };
 
 const renderFormStatus = () => {
+  const isSubmitting = formState.status === "submitting";
+  const hasError =
+    formState.status === "validationError" ||
+    formState.status === "submissionError";
+
   formStatus.textContent = FORM_STATUS_MESSAGES[formState.status];
-  formStatus.classList.toggle("is-error", formState.status === "error");
+  formStatus.classList.toggle("is-error", hasError);
   formStatus.classList.toggle("is-success", formState.status === "success");
+  contactForm.setAttribute("aria-busy", String(isSubmitting));
+  formSubmitButton.disabled = isSubmitting;
+  formSubmitButton.textContent = isSubmitting ? "전송 중..." : "메시지 보내기";
 };
 
 const updateFieldState = (field) => {
@@ -188,6 +199,14 @@ const updateFieldState = (field) => {
 
   formState.values[field.name] = value;
   formState.errors[field.name] = getFieldError(field.name, value);
+};
+
+const resetFormState = () => {
+  formFields.forEach((field) => {
+    formState.values[field.name] = "";
+    formState.errors[field.name] = "";
+    renderFieldError(field);
+  });
 };
 
 const escapeHtml = (value) => {
@@ -433,13 +452,16 @@ formFields.forEach((field) => {
   field.addEventListener("input", () => {
     // 입력 이벤트마다 해당 필드의 상태만 갱신해 오류를 바로 수정할 수 있게 한다.
     updateFieldState(field);
-    formState.status = "idle";
     renderFieldError(field);
+
+    if (formState.status === "submitting") return;
+
+    formState.status = "idle";
     renderFormStatus();
   });
 });
 
-contactForm.addEventListener("submit", (event) => {
+contactForm.addEventListener("submit", async (event) => {
   // 브라우저의 페이지 이동을 막고 현재 문서에서 검증 결과를 렌더링한다.
   event.preventDefault();
 
@@ -452,11 +474,43 @@ contactForm.addEventListener("submit", (event) => {
     (field) => formState.errors[field.name],
   );
 
-  formState.status = firstInvalidField ? "error" : "success";
+  if (firstInvalidField) {
+    formState.status = "validationError";
+    renderFormStatus();
+
+    // 오류가 있으면 사용자가 바로 수정할 수 있도록 첫 번째 필드로 초점을 옮긴다.
+    firstInvalidField.focus();
+    return;
+  }
+
+  const formData = new FormData(contactForm);
+  formState.status = "submitting";
   renderFormStatus();
 
-  // 오류가 있으면 사용자가 바로 수정할 수 있도록 첫 번째 필드로 초점을 옮긴다.
-  if (firstInvalidField) firstInvalidField.focus();
+  try {
+    // Form의 action을 전송 주소의 단일 기준으로 사용해 HTML과 JS 불일치를 막는다.
+    const response = await fetch(contactForm.action, {
+      method: "POST",
+      body: formData,
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Formspree 전송 실패: ${response.status}`);
+    }
+
+    contactForm.reset();
+    resetFormState();
+    formState.status = "success";
+  } catch (error) {
+    formState.status = "submissionError";
+    console.error("Contact 메시지 전송 중 오류가 발생했습니다.", error);
+  } finally {
+    // 성공과 실패 모두 최종 전송 상태와 버튼 상태를 DOM에 반영한다.
+    renderFormStatus();
+  }
 });
 
 projectsView.addEventListener("click", (event) => {
@@ -488,6 +542,7 @@ revealSections.forEach((section) => {
 // 새로고침 시 복원된 스크롤 위치까지 초기 상태에 반영한다.
 renderMenu();
 renderTheme();
+renderFormStatus();
 handleScroll();
 fetchProjects();
 startTypingEffect();

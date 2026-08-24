@@ -555,6 +555,12 @@ button:focus-visible {
   transform: translateY(-0.125rem);
 }
 
+.form-submit-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+
 .form-status {
   min-height: 1.6em;
   margin: 0;
