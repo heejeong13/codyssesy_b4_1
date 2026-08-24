@@ -66,7 +66,6 @@ const formState = {
 const projectsState = {
   status: "idle",
   repositories: [],
-  errorMessage: "",
 };
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
@@ -167,7 +166,10 @@ const renderProjects = () => {
 
   if (status === "error") {
     projectsView.innerHTML = `
-      <p class="projects-status is-error">프로젝트를 불러올 수 없습니다.</p>
+      <div class="projects-error">
+        <p class="projects-status is-error">프로젝트를 불러올 수 없습니다.</p>
+        <button class="project-retry-button" type="button">다시 시도</button>
+      </div>
     `;
     return;
   }
@@ -193,7 +195,6 @@ const renderProjects = () => {
 
 const fetchProjects = async () => {
   projectsState.status = "loading";
-  projectsState.errorMessage = "";
   renderProjects();
 
   try {
@@ -211,7 +212,6 @@ const fetchProjects = async () => {
   } catch (error) {
     projectsState.status = "error";
     projectsState.repositories = [];
-    projectsState.errorMessage = error.message;
     console.error("GitHub 프로젝트 요청 중 오류가 발생했습니다.", error);
   } finally {
     // 요청 결과와 관계없이 마지막 상태를 Projects DOM에 반드시 반영한다.
@@ -324,6 +324,14 @@ contactForm.addEventListener("submit", (event) => {
 
   // 오류가 있으면 사용자가 바로 수정할 수 있도록 첫 번째 필드로 초점을 옮긴다.
   if (firstInvalidField) firstInvalidField.focus();
+});
+
+projectsView.addEventListener("click", (event) => {
+  // 동적으로 생성되는 Retry 버튼을 부모에서 감지해 listener를 다시 만들지 않는다.
+  const retryButton = event.target.closest(".project-retry-button");
+
+  if (!retryButton) return;
+  fetchProjects();
 });
 
 window.addEventListener("scroll", handleScroll, { passive: true });
