@@ -9,6 +9,7 @@ const themeIcon = document.querySelector(".theme-icon");
 
 const NAV_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
+const THEME_STORAGE_KEY = "portfolio-theme";
 
 // click 이벤트와 렌더링 함수가 함께 사용하는 메뉴의 현재 상태다.
 let isMenuOpen = false;
@@ -19,8 +20,11 @@ let isHeaderScrolled = false;
 // scroll 이벤트와 렌더링 함수가 함께 사용하는 버튼의 표시 상태다.
 let isScrollTopVisible = false;
 
-// click 이벤트와 렌더링 함수가 함께 사용하는 현재 테마 상태다.
-let currentTheme = "light";
+// 저장값이 dark일 때만 Dark로 시작하고, 없거나 잘못된 값이면 Light를 사용한다.
+const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+
+// 저장된 사용자 선택을 초기 테마 상태로 사용한다.
+let currentTheme = storedTheme === "dark" ? "dark" : "light";
 
 // 상태를 기준으로 class와 접근성 속성을 한곳에서 함께 갱신한다.
 const renderMenu = () => {
@@ -120,8 +124,9 @@ scrollTopButton.addEventListener("click", () => {
 });
 
 themeToggle.addEventListener("click", () => {
-  // 이벤트에서는 상태를 변경하고 DOM 갱신은 renderTheme()에 맡긴다.
+  // 이벤트에서 변경한 상태를 저장한 뒤 DOM 갱신은 renderTheme()에 맡긴다.
   currentTheme = currentTheme === "light" ? "dark" : "light";
+  localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
   renderTheme();
 });
 
